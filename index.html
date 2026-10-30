@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; font: 14px system-ui, -apple-system, "Segoe UI", sans-serif; }
+img { max-width: 100%; } [hidden] { display: none !important; }
+</style>
+<title>Madrid 2027 Shopping Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#c4102c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Madrid street-plaque header (cobalt-bordered tile) over a filterable card grid, same as the food guide */
+:root {
+  --bg: #f4f6fa;
+  --surface: #ffffff;
+  --ink: #15203a;
+  --muted: #5a6680;
+  --line: #d9dfeb;
+  --cobalt: #1f4ea8;
+  --cobalt-soft: #e6edfa;
+  --carmine: #c4102c;
+  --carmine-soft: #fbe7ea;
+  --good: #17734a; --good-soft: #e3f4ea;
+  --mid: #8a5a00; --mid-soft: #fbf0d9;
+  --low: #a4262c; --low-soft: #fbe6e6;
+  --display: "DM Serif Display", Georgia, "Times New Roman", serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1322; --surface: #151d31; --ink: #e7ebf5; --muted: #9aa6c0; --line: #27324c;
+    --cobalt: #86a8f0; --cobalt-soft: #1b2a4d; --carmine: #ff7088; --carmine-soft: #3a1820;
+    --good: #6fd6a0; --good-soft: #143326; --mid: #f0c060; --mid-soft: #3a2e12; --low: #ff8a8a; --low-soft: #3d1a1c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1322; --surface: #151d31; --ink: #e7ebf5; --muted: #9aa6c0; --line: #27324c;
+  --cobalt: #86a8f0; --cobalt-soft: #1b2a4d; --carmine: #ff7088; --carmine-soft: #3a1820;
+  --good: #6fd6a0; --good-soft: #143326; --mid: #f0c060; --mid-soft: #3a2e12; --low: #ff8a8a; --low-soft: #3d1a1c;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1120px; margin: 0 auto; padding-block: 32px 64px; display: grid; gap: 28px; }
+header { display: grid; gap: 14px; }
+.plaque {
+  justify-self: start; background: var(--surface); border: 3px solid var(--cobalt); border-radius: 6px;
+  outline: 1px solid var(--cobalt); outline-offset: 3px; padding: 10px 22px 12px; text-align: center;
+}
+.plaque small { display: block; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--carmine); font-weight: 700; }
+.plaque h1 { margin: 2px 0 0; font-family: var(--display); font-weight: 400; font-size: clamp(30px, 6vw, 46px); line-height: 1.05; color: var(--cobalt); text-wrap: balance; }
+.lede { margin: 0; max-width: 68ch; color: var(--muted); }
+.lede strong { color: var(--ink); font-weight: 600; }
+.controls { display: grid; gap: 12px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 10px; border-bottom: 1px solid var(--line); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+input[type="search"], select {
+  font: inherit; padding: 9px 12px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+input[type="search"] { flex: 1 1 240px; min-width: 0; }
+button.chip {
+  font: inherit; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+button.chip[aria-pressed="true"] { background: var(--cobalt); border-color: var(--cobalt); color: var(--surface); }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--carmine); outline-offset: 2px; }
+.count { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+section { display: grid; gap: 14px; }
+section h2 {
+  margin: 0; font-family: var(--display); font-weight: 400; font-size: 24px; color: var(--cobalt);
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+}
+section h2 span { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px;
+  display: grid; gap: 8px; align-content: start; min-width: 0;
+}
+.card.fav { border-color: var(--carmine); }
+.card.event { border-style: dashed; }
+.top { display: flex; gap: 8px; align-items: start; justify-content: space-between; }
+.card h3 { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.25; }
+.star { flex: none; border: 0; background: none; cursor: pointer; font-size: 20px; line-height: 1; color: var(--line); padding: 2px; }
+.star[aria-pressed="true"] { color: var(--carmine); }
+.marks { display: flex; gap: 2px; flex: none; }
+.tick { flex: none; border: 1px solid var(--line); background: none; cursor: pointer; font-size: 13px; font-weight: 700; line-height: 1; color: var(--line); width: 26px; height: 26px; border-radius: 6px; padding: 0; }
+.tick[aria-pressed="true"] { background: var(--good-soft); border-color: var(--good); color: var(--good); }
+.card.done { opacity: .72; }
+.what { margin: 0; font-size: 14px; }
+.meta { display: grid; gap: 4px; font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+.meta b { color: var(--ink); font-weight: 500; }
+.hours { display: grid; grid-template-columns: auto 1fr; gap: 0 10px; font-family: var(--mono); font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hours .closed { color: var(--low); font-weight: 500; }
+.verdict { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.score { display: inline-flex; align-items: baseline; gap: 4px; padding: 3px 9px; border-radius: 6px; font-variant-numeric: tabular-nums; }
+.score b { font-size: 17px; }
+.score small { font-size: 11.5px; }
+.score.good { background: var(--good-soft); color: var(--good); }
+.score.mid { background: var(--mid-soft); color: var(--mid); }
+.score.low { background: var(--low-soft); color: var(--low); }
+.score.none { background: var(--bg); color: var(--muted); font-size: 12px; }
+.lvl { font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: .04em; }
+.lvl i { font-style: normal; color: var(--line); }
+.sources { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.sources a { color: var(--ink); text-decoration: none; border-bottom: 1px dotted var(--muted); }
+.sources a:hover { color: var(--cobalt); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: var(--cobalt-soft); color: var(--cobalt); }
+.tag.l { background: var(--carmine-soft); color: var(--carmine); }
+.tag.b { background: var(--good-soft); color: var(--good); }
+.tag.out { background: var(--carmine-soft); color: var(--carmine); }
+.tag.shut { background: var(--low-soft); color: var(--low); }
+.tag.unsure { background: var(--mid-soft); color: var(--mid); }
+.tag.km { background: var(--bg); color: var(--muted); font-family: var(--mono); font-weight: 500; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; font-weight: 600; }
+.links a { color: var(--cobalt); text-decoration: none; padding: 7px 12px; border: 1px solid var(--cobalt); border-radius: 999px; }
+.links a:first-child { background: var(--cobalt); color: var(--surface); }
+.links a:hover { text-decoration: underline; }
+@media (max-width: 600px) {
+  /* Phone: keep the sticky bar short; filters scroll sideways instead of wrapping. */
+  .controls { gap: 8px; padding-block: 8px; }
+  .controls .row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .controls .row::-webkit-scrollbar { display: none; }
+  .controls .row > * { flex: none; }
+  input[type="search"] { flex: 1 0 150px; }
+  .controls .row:first-child { flex-wrap: wrap; }
+  .controls .row:first-child input { flex: 1 1 100%; }
+  .controls select { padding: 7px 6px; font-size: 13px; }
+  .controls button.chip { padding: 6px 10px; }
+}
+.note { font-size: 12.5px; color: var(--muted); font-style: italic; margin: 0; }
+.empty { color: var(--muted); }
+footer { font-size: 13px; color: var(--muted); max-width: 72ch; display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 16px; }
+footer p { margin: 0; }
+@media (prefers-reduced-motion: no-preference) { .card { transition: border-color .15s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="plaque"><small>Madrid · abril 2027</small><h1>De compras</h1></div>
+    <p class="lede">Every shop, outlet and boutique from the shopping reels Andrés and Luisana sent each other on Instagram, <strong>May–October 2026</strong>. <span id="total"></span> Hours and ratings checked 30 Oct 2026. Tap ☆ for shops you want to go to and ✓ once you've bought something; the marks stay on this phone.</p>
+  </header>
+
+  <div class="controls">
+    <div class="row">
+      <input type="search" id="q" placeholder="Search a shop, brand or street" aria-label="Search shops">
+      <select id="sort" aria-label="Sort shops">
+        <option value="guide">Guide order</option>
+        <option value="near">Nearest to Sol</option>
+        <option value="score">Highest rated</option>
+        <option value="price">Cheapest first</option>
+      </select>
+      <button class="chip" id="sunOnly" type="button" aria-pressed="false">Open Sundays</button>
+      <button class="chip" id="favOnly" type="button" aria-pressed="false">☆ Want to go</button>
+      <button class="chip" id="hideDone" type="button" aria-pressed="false">Hide ✓ bought</button>
+    </div>
+    <div class="row" id="cats" role="group" aria-label="Filter by type"></div>
+    <div class="count" id="count"></div>
+  </div>
+
+  <div id="list"></div>
+
+  <footer>
+    <p><strong>Sundays:</strong> many small shops close on Sundays, some on Mondays too, and a few close 14:00–17:00 for lunch. Chains, El Corte Inglés and both outlets open every day. Madrid has no public holidays in April 2027 (Holy Thursday and Good Friday fall on 25–26 March).</p>
+    <p><strong>Score:</strong> the average of Google and TripAdvisor on a 5-point scale. Sources with fewer than 20 reviews are shown but left out. Green is 4.4 and up, amber 3.8–4.3, red below 3.8. TripAdvisor figures come from search listings and may lag the live page.</p>
+    <p><strong>Price level</strong> of a main item (a dress, a pair of shoes, a bag), estimated from each brand's usual range: € under €40 · €€ €40–100 · €€€ €100–250 · €€€€ over €250.</p>
+    <p><strong>Hours</strong> are from Google Maps. Sunday 1 November was a holiday, so where Google showed holiday hours the usual Sunday is marked "not confirmed". Distances are straight-line from Puerta del Sol.</p>
+  </footer>
+</div>
+
+<script>
+const DATA = {"meta": {"checked": "30 Oct 2026", "hours_note": "Weekly hours from Google Maps, checked 30 Oct 2026. Sunday 1 Nov 2026 was a holiday (All Saints), so where Google showed holiday hours the regular Sunday is not confirmed (marked sq).", "price_bands": {"1": "under €40", "2": "€40–100", "3": "€100–250", "4": "over €250"}, "price_note": "Price level = typical price of a main item (a dress, a pair of shoes, a bag). Estimated from each brand's usual range, not checked item by item.", "categories": ["Designer outlets", "Concept stores", "Spanish brands", "Sneakers", "Shoes", "Kids", "Markets", "Others"], "reels": {"DeT339XKfwa": {"s": "ohlileven", "by": "A", "d": "12 Oct 2026"}, "Dc84fKzhyRo": {"s": "nino.travels", "by": "A", "d": "13 Oct 2026"}, "Dc--wLHhGJW": {"s": "crystalwarman", "by": "B", "d": "25–26 Oct 2026"}, "De_buzSuTp0": {"s": "cintiia_rm", "by": "A", "d": "27 Oct 2026"}, "De-ZkO_P0KA": {"s": "shilla.rondanelli", "by": "L", "d": "28 Oct 2026"}, "DeqrvAzuz0Z": {"s": "julespayne_", "by": "A", "d": "28 Oct 2026"}, "DbI8UgRRF5F": {"s": "karisalmen", "by": "A", "d": "26 Jul 2026"}, "DXmeN5EgNCX": {"s": "nataliastewart_", "by": "A", "d": "26 May 2026"}, "DeRTocjtywS": {"s": "cuentatrasparatuboda", "by": "L", "d": "27 Oct 2026"}}}, "places": [{"c": "Designer outlets", "n": "Las Rozas Village", "w": "Open-air outlet village of designer and premium brands at reduced prices. The reel calls it a must-visit for shopping in Madrid.", "a": "C. Juan Ramón Jiménez, 3, 28232 Las Rozas de Madrid", "out": "Outlet: designer brands below full price.", "dist": "Outside Madrid, about 20–30 km north-west of Sol (30 min by car on the A-6). Buses 625, 628, 629 from Moncloa (30–50 min). The Shopping Express coach from Plaza de Oriente (€18 return) showed as temporarily unavailable in Oct 2026: check before going.", "lvl": 3, "h": ["10:00–21:00", "10:00–21:00", "10:00–21:00", "10:00–21:00", "10:00–21:00", "10:00–22:00", "10:00–21:00"], "hnote": "Open every day, Sundays and holidays included. Closed only 1 Jan, 6 Jan and 25 Dec.", "g": [4.4, 45547], "ta": [4.1, 1511, "https://www.tripadvisor.com/Attraction_Review-g644339-d1596710-Reviews-Las_Rozas_Village-Las_Rozas.html"], "web": "https://www.thebicestercollection.com/las-rozas-village/en/", "reels": ["Dc84fKzhyRo"], "km": 20.1}, {"c": "Designer outlets", "n": "SSRR The Style Outlets", "w": "Outlet centre with at least 30% off everything, sometimes 70–80%. Brands named in the reel: Coosy, Simorra, Calvin Klein Underwear, Only, Fifty Factory, Zara Home, Bimba y Lola, Tempe (Inditex) and Mango.", "a": "C. de Salvador de Madariaga, s/n, 28702 San Sebastián de los Reyes", "out": "Outlet: at least 30% off, sometimes 70–80% (per the reel).", "dist": "Outside Madrid, about 19 km north of Sol (straight line). Metro line 10 to Hospital Infanta Sofía, then about 15 min on foot, or interurban buses 171 / 183. By car: A-1, exit 20, free parking.", "lvl": 2, "h": ["10:00–22:00", "10:00–22:00", "10:00–22:00", "10:00–22:00", "10:00–22:00", "10:00–22:00", "10:00–22:00"], "hnote": "Open every day. Closed 1 Jan, 6 Jan and 25 Dec.", "g": [4.3, 29617], "ta": [3.9, 225, "https://www.tripadvisor.com/Attraction_Review-g562660-d4206338-Reviews-San_Sebastian_de_los_Reyes_The_Style_Outlets-San_Sebastian_de_los_Reyes.html"], "web": "https://ss-de-los-reyes.thestyleoutlets.es/", "reels": ["DeT339XKfwa"], "km": 18.5}, {"c": "Designer outlets", "n": "Ski-wear outlet at NH Eurobuilding", "w": "Pop-up outlet of luxury ski wear held in the hotel from 27 to 30 Oct 2026.", "a": "Calle del Padre Damián, 23, 28036 Madrid", "out": "Pop-up outlet (one-off event).", "event": true, "lvl": null, "h": null, "hnote": "Not on during your trip. A ski outlet has been held at this hotel every late October or early November for years, most likely run by the Madrid ski shop Tornal Moya (Calle de Bravo Murillo 234). No edition found between Nov 2026 and Apr 2027; the next one is expected around late Oct 2027.", "reels": ["De_buzSuTp0"], "km": 4.8}, {"c": "Concept stores", "n": "WOW Concept (Serrano)", "w": "Multi-brand concept store mixing fashion, beauty, accessories and design. A second, larger WOW is at Gran Vía 18 (Google 4.0, 2,503 reviews).", "a": "C. de Serrano, 52, Salamanca, 28001 Madrid", "lvl": 3, "h": ["10:00–22:00", "10:00–22:00", "10:00–22:00", "10:00–22:00", "10:00–22:00", "10:00–22:00", "11:00–22:00"], "g": [4.1, 482], "reels": ["De-ZkO_P0KA"], "km": 1.8}, {"c": "Spanish brands", "n": "Loewe", "w": "Spain's luxury leather house: bags, small leather goods and ready-to-wear. In the reel's top 5, \"because… Spain\".", "a": "C. de Serrano, 34, Salamanca, 28001 Madrid", "lvl": 4, "h": ["10:30–21:00", "10:30–21:00", "10:30–21:00", "10:30–21:00", "10:30–21:00", "10:30–21:00", "12:00–19:30"], "g": [4.2, 853], "note": "The historic Gran Vía 8 store was temporarily closed in Oct 2026.", "reels": ["Dc--wLHhGJW"], "km": 1.6}, {"c": "Spanish brands", "n": "Nude Project", "w": "Young Spanish streetwear brand: hoodies, tees and sweats. The reel calls it \"cool young Spanish trendy style\".", "a": "Calle de Fuencarral, 18, Centro, 28004 Madrid", "lvl": 2, "h": ["11:00–20:30", "11:00–20:30", "11:00–20:30", "11:00–20:30", "11:00–21:00", "11:00–21:00", "12:00–19:30"], "g": [4.0, 1654], "reels": ["Dc--wLHhGJW"], "km": 0.6}, {"c": "Spanish brands", "n": "peSeta", "w": "Spanish brand of bags, pouches and small accessories. The reel's \"unique little treasures\".", "a": "C. de las Huertas, 37, Centro, 28014 Madrid", "lvl": 2, "h": ["11:00–21:00", "11:00–21:00", "11:00–21:00", "11:00–21:00", "11:00–21:00", "11:00–21:00", "12:00–20:00"], "g": [4.6, 176], "note": "Other shops: Corredera Baja de San Pablo 26 (Malasaña), Calle de Hortaleza 64 (Chueca), Calle de Goya 50 (Salamanca).", "reels": ["Dc--wLHhGJW"], "km": 0.6}, {"c": "Spanish brands", "n": "Zara (Plaza de España)", "w": "The big Zara in the Edificio España, with women, men, kids and home. The top-5 reel says there are \"one million Zaras\", each more beautiful than the last; the baby-shopping reel shows Zara Kids rompers.", "a": "Plaza de España, 19, Centro, 28013 Madrid", "lvl": 1, "h": ["10:00–22:00", "10:00–22:00", "10:00–22:00", "10:00–22:00", "10:00–22:00", "10:00–22:00", "10:00–22:00"], "g": [4.1, 2360], "reels": ["Dc--wLHhGJW", "DXmeN5EgNCX"], "km": 1.0}, {"c": "Spanish brands", "n": "Zúa", "w": "Spanish women's fashion brand, from @karisalmen's Madrid shopping guide.", "a": "C. de Hermosilla, 29, Salamanca, 28001 Madrid", "lvl": 2, "h": ["10:30–21:00", "10:30–21:00", "10:30–21:00", "10:30–21:00", "10:30–21:00", "10:30–21:00", "12:00–20:00"], "sq": true, "g": [2.9, 74], "note": "Second shop at Calle de Fuencarral 122. Google reviews are low (mostly about service).", "reels": ["DbI8UgRRF5F"], "km": 1.9}, {"c": "Spanish brands", "n": "Natura", "w": "Spanish chain (Natura Selection) of boho clothing, accessories, home and gift items. From @karisalmen's guide.", "a": "C. de Postas, 16, Centro, 28012 Madrid", "lvl": 1, "h": ["10:00–21:30", "10:00–21:30", "10:00–21:30", "10:00–21:30", "10:00–22:00", "10:00–22:00", "12:00–20:30"], "g": [4.4, 647], "note": "Other shops include Calle Velázquez 48 and Calle de Fuencarral 127.", "reels": ["DbI8UgRRF5F"], "km": 0.2}, {"c": "Spanish brands", "n": "Mulaya", "w": "Spanish brand of boho women's clothing and accessories at low prices. From @karisalmen's guide.", "a": "C. de Toledo, 34, Centro, 28005 Madrid", "lvl": 1, "h": ["10:00–21:00", "10:00–21:30", "10:00–21:30", "10:00–21:30", "10:00–21:30", "10:00–21:30", "10:00–21:00"], "g": [3.8, 992], "note": "Other shops: Calle Velázquez 43, Calle de Eloy Gonzalo 4–6, Calle de Narváez 43.", "reels": ["DbI8UgRRF5F"], "km": 0.6}, {"c": "Spanish brands", "n": "Coosy", "w": "Spanish women's brand known for printed dresses and party outfits. In @karisalmen's guide, #4 in the wedding-guest reel, and also sold at the SSRR outlet.", "a": "C. del Conde de Xiquena, 9, Centro, 28004 Madrid", "lvl": 3, "h": ["Closed", "10:30–20:30", "10:30–20:30", "10:30–20:30", "10:30–20:30", "10:30–20:30", "Closed"], "g": [4.1, 282], "note": "Other shops: Calle de Claudio Coello 46 and Calle de Hermosilla 17 (both rated 3.4 on Google).", "reels": ["DbI8UgRRF5F", "DeRTocjtywS"], "km": 1.0}, {"c": "Spanish brands", "n": "La Veste", "w": "Women's clothing boutique, from @karisalmen's guide (@lavestelaveste).", "a": "C. de Orfila, 4, Chamberí, 28010 Madrid", "lvl": null, "h": ["10:30–19:00", "10:00–19:00", "10:00–19:00", "10:00–19:00", "10:00–19:00", "11:00–20:00", "Closed"], "g": [4.0, 6], "note": "Matched on Google Maps by name only. Check the shop's Instagram before going.", "reels": ["DbI8UgRRF5F"], "km": 1.4}, {"c": "Spanish brands", "n": "Victoria Colección", "w": "Party and wedding-guest dresses. #1 in @cuentatrasparatuboda's 5 Spanish wedding-guest brands.", "a": "Calle Velázquez, 49, Salamanca, 28001 Madrid", "lvl": 3, "h": ["10:00–20:30", "10:00–20:30", "10:00–20:30", "10:00–20:30", "10:00–20:30", "10:00–20:30", "Closed"], "sq": true, "g": [4.4, 1061], "reels": ["DeRTocjtywS"], "km": 2.1}, {"c": "Spanish brands", "n": "Lady Pipa", "w": "Spanish wedding-guest and bridal brand. #2 in the wedding-guest reel.", "a": "Calle del Almirante, 10, Centro, 28004 Madrid", "lvl": 3, "h": ["Closed", "11:00–20:00", "11:00–20:00", "11:00–20:00", "11:00–20:00", "11:00–20:00", "Closed"], "sq": true, "g": [3.2, 823], "reels": ["DeRTocjtywS"], "km": 1.0}, {"c": "Spanish brands", "n": "Miphai", "w": "Spanish brand of guest dresses in bold colours and prints. #3 in the wedding-guest reel.", "a": "C. de Claudio Coello, 88, Salamanca, 28006 Madrid", "lvl": 3, "h": ["12:00–20:00", "10:00–21:00", "10:00–21:00", "10:00–21:00", "10:00–21:00", "10:00–21:00", "Closed"], "g": [4.0, 937], "note": "Also a corner on the 4th floor of El Corte Inglés Princesa (Calle de la Princesa 56), open Sundays.", "reels": ["DeRTocjtywS"], "km": 2.2}, {"c": "Spanish brands", "n": "Maksu", "w": "Women's clothing brand. #5 in the wedding-guest reel.", "a": "Calle de Lagasca, 50, Salamanca, 28001 Madrid", "lvl": 3, "h": ["11:00–19:00", "11:00–20:00", "11:00–20:00", "11:00–20:00", "11:00–20:00", "11:00–20:00", "Closed"], "g": [4.1, 69], "reels": ["DeRTocjtywS"], "km": 2.0}, {"c": "Sneakers", "n": "HOFF", "w": "Spanish sneaker and shoe brand. #1 in the reel's top 5: \"sneakers, obviously\". Reviewers praise the staff's help with sizes.", "a": "Calle de Fuencarral, 11, Centro, 28004 Madrid", "lvl": 3, "h": ["10:30–21:30", "10:30–21:30", "10:30–21:30", "10:30–21:30", "10:30–21:30", "10:30–21:30", "12:00–20:00"], "g": [4.4, 75], "note": "Bigger store at Calle Velázquez 37, Salamanca (Google 3.9, 502 reviews).", "reels": ["Dc--wLHhGJW"], "km": 0.5}, {"c": "Shoes", "n": "Calzados Rosyma", "w": "Neighbourhood shoe shop recommended for ballet flats. Google reviewers also mention good-quality ballet flats and friendly service.", "a": "C. de Bravo Murillo, 200, Tetuán, 28020 Madrid", "lvl": null, "h": ["Closed", "10:00–14:00, 17:00–20:30", "10:00–14:00, 17:00–20:30", "10:00–14:00, 17:00–20:30", "10:00–14:00, 17:00–20:30", "10:00–14:00, 17:00–20:30", "Closed"], "g": [4.6, 33], "note": "Closes for lunch 14:00–17:00.", "web": "https://calzadosrosyma.com", "reels": ["DeqrvAzuz0Z"], "km": 4.3}, {"c": "Kids", "n": "ZigZag Kids", "w": "Kids' shop with clothes, toys and gifts. The reel's creator found \"so many cute things\" for her girls and \"the BEST\" Jellycat selection.", "a": "C. de Barbieri, 26, Centro, 28004 Madrid", "lvl": 2, "h": ["11:00–21:00", "11:00–21:00", "11:00–21:00", "11:00–21:00", "11:00–21:00", "11:00–21:00", "12:00–20:00"], "sq": true, "g": [4.6, 200], "reels": ["Dc--wLHhGJW"], "km": 0.8}, {"c": "Kids", "n": "Gocco", "w": "Spanish kids' and baby clothing brand. First stop in @nataliastewart_'s tour of Spanish baby stores (knit rompers, smocked blouses).", "a": "Calle de Lagasca, 45, Salamanca, 28001 Madrid", "lvl": 1, "h": ["10:00–20:30", "10:00–20:30", "10:00–20:30", "10:00–20:30", "10:00–20:30", "10:00–20:30", "12:00–20:00"], "g": [3.7, 78], "note": "Also at Calle de Ayala 21 and in El Corte Inglés Preciados.", "reels": ["DXmeN5EgNCX"], "km": 2.0}, {"c": "Kids", "n": "Anacleta Kids", "w": "Baby and kids' clothing: hand-smocked rompers and classic Spanish baby wear, shown at length in the baby-stores reel.", "a": "Calle de Lagasca, 52, Salamanca, 28001 Madrid", "lvl": 2, "h": ["10:00–20:00", "10:00–20:00", "10:00–20:00", "10:00–20:00", "10:00–20:00", "10:00–20:00", "Closed"], "g": [3.9, 32], "reels": ["DXmeN5EgNCX"], "km": 1.9}, {"c": "Kids", "n": "Nait Nait", "w": "Baby clothes and accessories (printed bibs and smocks in the reel).", "a": "Calle de Lagasca, 72, Salamanca, 28001 Madrid", "lvl": null, "h": ["10:00–20:30", "10:00–20:30", "10:00–20:30", "10:00–20:30", "10:00–20:30", "11:00–20:30", "Closed"], "sq": true, "g": [3.5, 131], "reels": ["DXmeN5EgNCX"], "km": 2.0}, {"c": "Kids", "n": "Doña Carmen", "w": "Traditional Spanish baby clothing: knitwear sets and smocked outfits.", "a": "C. de Narváez, 37, Retiro, 28009 Madrid", "lvl": null, "h": ["Closed", "10:00–14:00, 17:00–20:00", "10:00–14:00, 17:00–20:00", "10:00–14:00, 17:00–20:00", "10:00–14:00, 17:00–20:00", "10:00–14:00", "Closed"], "sq": true, "g": [4.3, 148], "note": "Several shops; others at Calle de Diego de León 61, Calle de Hermosilla 50 and Calle de Alcalá 173. Closes for lunch.", "reels": ["DXmeN5EgNCX"], "km": 2.4}, {"c": "Kids", "n": "Aiana Larocca", "w": "Kids' fashion boutique (moda infantil); the reel shows christening and ceremony outfits.", "a": "C. de Hermosilla, 48, Salamanca, 28001 Madrid", "lvl": null, "h": ["11:00–14:00, 17:00–20:00", "11:00–14:00, 17:00–20:00", "11:00–14:00, 17:00–20:00", "11:00–14:00, 17:00–20:00", "11:00–14:00, 17:00–20:00", "11:00–14:30", "Closed"], "g": [4.6, 93], "note": "Closes for lunch.", "reels": ["DXmeN5EgNCX"], "km": 2.1}, {"c": "Kids", "n": "Tartine et Chocolat", "w": "French premium baby and kids' brand: knits, sleeping bags and ceremony clothes in the reel.", "a": "C. de Hermosilla, 32, Salamanca, 28001 Madrid", "lvl": 3, "h": ["10:00–20:30", "10:00–20:30", "10:00–20:30", "10:00–20:30", "10:00–20:30", "10:00–20:30", "Closed"], "g": null, "reels": ["DXmeN5EgNCX"], "km": 2.0}, {"c": "Kids", "n": "El Corte Inglés Preciados", "w": "Department store. The baby-stores reel points to its baby section for the Spanish brands Coconut and Paz Rodríguez.", "a": "C. de Preciados, 3, Centro, 28013 Madrid", "lvl": 2, "h": ["11:00–21:00", "10:00–22:00", "10:00–22:00", "10:00–22:00", "10:00–22:00", "10:00–22:00", "11:00–21:00"], "g": [4.3, 20074], "reels": ["DXmeN5EgNCX"], "km": 0.2}, {"c": "Others", "n": "Loué", "w": "Pre-owned designer bags. In the reel's top 5 for \"rare designer finds\".", "a": "C. de la Virgen de los Peligros, 12, Centro, 28013 Madrid", "lvl": 4, "h": ["10:30–20:30", "10:30–20:30", "10:30–20:30", "10:30–20:30", "10:30–20:30", "10:30–20:30", "11:00–20:00"], "g": [4.7, 212], "reels": ["Dc--wLHhGJW"], "km": 0.4}]};
+const META = DATA.meta, PLACES = DATA.places, CATS = META.categories;
+const BY = { A: "Andrés sent", L: "Luisana sent", B: "Both sent", D: "Added by Andrés" };
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const reelUrl = c => "https://www.instagram.com/reel/" + c + "/";
+const mapUrl = p => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(p.n + ", " + p.a);
+const link = (u, t) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`;
+const fmtN = n => " (" + n.toLocaleString("en-US") + ")";
+
+function scoreOf(p) {
+  const vals = [p.g, p.ta].filter(v => v && v[1] >= 20).map(v => v[0]);
+  return vals.length ? { v: vals.reduce((a, b) => a + b, 0) / vals.length, n: vals.length } : null;
+}
+function sunday(p) {
+  if (!p.h) return null;
+  if (p.sq) return "unsure";
+  return p.h[6] === "Closed" ? "closed" : "open";
+}
+function hoursRows(h) {
+  const out = [];
+  for (let i = 0; i < 7;) {
+    let j = i; while (j + 1 < 7 && h[j + 1] === h[i]) j++;
+    out.push([i === j ? DAYS[i] : DAYS[i] + "–" + DAYS[j], h[i], j === 6]);
+    i = j + 1;
+  }
+  return out;
+}
+
+const state = { cat: "All", q: "", sort: "guide", sunOnly: false, favOnly: false, hideDone: false, favs: new Set(), done: new Set() };
+try {
+  const saved = JSON.parse(localStorage.getItem("mad27-shop-marks") || "{}");
+  state.favs = new Set(saved.favs || []); state.done = new Set(saved.done || []);
+} catch (e) {}
+function saveMarks() {
+  try { localStorage.setItem("mad27-shop-marks", JSON.stringify({ favs: [...state.favs], done: [...state.done] })); } catch (e) {}
+}
+
+function ratingBlock(p) {
+  if (p.event) return "";
+  const s = scoreOf(p);
+  const cls = !s ? "none" : s.v >= 4.4 ? "good" : s.v >= 3.8 ? "mid" : "low";
+  const badge = s ? `<span class="score ${cls}"><b>${s.v.toFixed(1)}</b><small>/5 · ${s.n} site${s.n > 1 ? "s" : ""}</small></span>`
+    : `<span class="score none">Not enough reviews to score</span>`;
+  const lvl = p.lvl ? `<span class="lvl" title="Price of a main item: ${esc(META.price_bands[p.lvl])}">${"€".repeat(p.lvl)}<i>${"€".repeat(4 - p.lvl)}</i></span>` : "";
+  const src = [];
+  if (p.g) src.push(link(mapUrl(p), "Google " + p.g[0].toFixed(1) + fmtN(p.g[1])));
+  if (p.ta) src.push(link(p.ta[2], "TripAdvisor " + p.ta[0].toFixed(1) + fmtN(p.ta[1])));
+  return `<div class="verdict">${badge}${lvl}</div>${src.length ? `<div class="sources">${src.join("")}</div>` : `<div class="sources">No online reviews yet</div>`}`;
+}
+
+function card(p) {
+  const fav = state.favs.has(p.n), done = state.done.has(p.n), sun = sunday(p);
+  const tags = [];
+  if (p.out) tags.push(`<span class="tag out">${esc(p.out)}</span>`);
+  if (sun === "open") tags.push(`<span class="tag">Open Sundays</span>`);
+  if (sun === "closed") tags.push(`<span class="tag shut">Closed Sundays</span>`);
+  if (sun === "unsure") tags.push(`<span class="tag unsure">Sunday not confirmed</span>`);
+  if (p.h && p.h[0] === "Closed") tags.push(`<span class="tag shut">Closed Mondays</span>`);
+  if (p.km != null && !p.event) tags.push(`<span class="tag km">${p.km.toFixed(1)} km from Sol</span>`);
+  const hours = p.h ? `<div class="hours">${hoursRows(p.h).map(([d, v, isSun]) =>
+    `<span>${d}</span><span class="${v === "Closed" ? "closed" : ""}">${esc(v)}${isSun && p.sq ? " (not confirmed)" : ""}</span>`).join("")}</div>` : "";
+  const sent = p.reels.map(c => { const r = META.reels[c];
+    return `<span class="tag${r.by === "L" ? " l" : r.by === "B" ? " b" : ""}">${BY[r.by]} · ${esc(r.d)}</span>`; }).join("");
+  const links = [link(mapUrl(p), "Map")]
+    .concat(p.web ? [link(p.web, "Website")] : [])
+    .concat(p.reels.map(c => link(reelUrl(c), "Reel by @" + META.reels[c].s))).join("");
+  return `<article class="card${fav ? " fav" : ""}${done ? " done" : ""}${p.event ? " event" : ""}">
+    <div class="top"><h3>${esc(p.n)}</h3>
+      <div class="marks">
+        <button class="star" type="button" data-n="${esc(p.n)}" aria-pressed="${fav}" aria-label="Want to go to ${esc(p.n)}">${fav ? "★" : "☆"}</button>
+        <button class="tick" type="button" data-n="${esc(p.n)}" aria-pressed="${done}" aria-label="Bought at ${esc(p.n)}">✓</button>
+      </div></div>
+    ${ratingBlock(p)}
+    ${tags.length ? `<div class="tags">${tags.join("")}</div>` : ""}
+    <p class="what">${esc(p.w)}</p>
+    <div class="meta"><span>${esc(p.a)}</span>${p.dist ? `<span><b>Getting there:</b> ${esc(p.dist)}</span>` : ""}</div>
+    ${hours}
+    ${p.hnote ? `<p class="note">${esc(p.hnote)}</p>` : ""}
+    ${p.note ? `<p class="note">${esc(p.note)}</p>` : ""}
+    <div class="tags">${sent}</div>
+    <div class="links">${links}</div>
+  </article>`;
+}
+
+function sorted(items) {
+  const by = f => [...items].sort((x, y) => f(x) - f(y));
+  if (state.sort === "near") return by(p => p.km ?? 999);
+  if (state.sort === "score") return by(p => -((scoreOf(p) || { v: -1 }).v));
+  if (state.sort === "price") return by(p => p.lvl || 9);
+  return items;
+}
+
+const catBox = document.getElementById("cats");
+catBox.innerHTML = ["All", ...CATS].map(c => `<button class="chip" type="button" aria-pressed="false">${esc(c)}</button>`).join("");
+catBox.addEventListener("click", e => { const b = e.target.closest("button"); if (b) { state.cat = b.textContent; render(); } });
+document.getElementById("q").addEventListener("input", e => { state.q = e.target.value.trim().toLowerCase(); render(); });
+document.getElementById("sort").addEventListener("change", e => { state.sort = e.target.value; render(); });
+for (const id of ["sunOnly", "favOnly", "hideDone"])
+  document.getElementById(id).addEventListener("click", () => { state[id] = !state[id]; render(); });
+document.getElementById("total").textContent = PLACES.filter(p => !p.event).length + " shops, plus one past pop-up outlet.";
+
+function render() {
+  catBox.querySelectorAll(".chip").forEach(b => b.setAttribute("aria-pressed", String(b.textContent === state.cat)));
+  for (const id of ["sunOnly", "favOnly", "hideDone"]) document.getElementById(id).setAttribute("aria-pressed", String(state[id]));
+  const hits = PLACES.filter(p =>
+    (state.cat === "All" || p.c === state.cat) &&
+    (!state.sunOnly || sunday(p) === "open") &&
+    (!state.favOnly || state.favs.has(p.n)) &&
+    (!state.hideDone || !state.done.has(p.n)) &&
+    (!state.q || [p.n, p.w, p.a, p.c, p.note, p.hnote, ...p.reels.map(c => META.reels[c].s)].join(" ").toLowerCase().includes(state.q)));
+  document.getElementById("count").textContent = hits.length + (hits.length === 1 ? " shop" : " shops") + " shown";
+  const list = document.getElementById("list");
+  list.style.display = "grid"; list.style.gap = "32px";
+  const sections = CATS.map(c => {
+    const items = sorted(hits.filter(p => p.c === c));
+    if (!items.length) {
+      return state.cat === c ? `<section><h2>${esc(c)} <span>0</span></h2><p class="empty">None in the reels yet.</p></section>` : "";
+    }
+    return `<section><h2>${esc(c)} <span>${items.length}</span></h2><div class="grid">${items.map(card).join("")}</div></section>`;
+  }).join("");
+  list.innerHTML = sections || `<p class="empty">No shops match. Clear the search or pick another type.</p>`;
+}
+document.getElementById("list").addEventListener("click", e => {
+  const b = e.target.closest(".star, .tick"); if (!b) return;
+  const set = b.classList.contains("star") ? state.favs : state.done;
+  const n = b.dataset.n; set.has(n) ? set.delete(n) : set.add(n);
+  saveMarks(); render();
+});
+render();
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+</script>
