@@ -102,6 +102,13 @@ section h2 span { font-family: var(--mono); font-size: 12px; color: var(--muted)
 .tick { flex: none; border: 1px solid var(--line); background: none; cursor: pointer; font-size: 13px; font-weight: 700; line-height: 1; color: var(--line); width: 26px; height: 26px; border-radius: 6px; padding: 0; }
 .tick[aria-pressed="true"] { background: var(--good-soft); border-color: var(--good); color: var(--good); }
 .card.done { opacity: .72; }
+.nope { flex: none; border: 1px solid var(--line); background: none; cursor: pointer; font-size: 13px; font-weight: 700; line-height: 1; color: var(--line); width: 26px; height: 26px; border-radius: 6px; padding: 0; }
+.nope[aria-pressed="true"] { background: var(--low-soft); border-color: var(--low); color: var(--low); }
+.card.no { opacity: .55; border-style: dashed; }
+.card.no h3 { text-decoration: line-through; }
+button.chip.send { border-color: var(--low); color: var(--low); }
+#sendOut { display: grid; gap: 6px; }
+#sendOut textarea { font: 13px/1.4 var(--mono); width: 100%; min-height: 110px; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
 .what { margin: 0; font-size: 14px; }
 .meta { display: grid; gap: 4px; font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
 .meta b { color: var(--ink); font-weight: 500; }
@@ -169,6 +176,12 @@ footer p { margin: 0; }
       <button class="chip" id="sunOnly" type="button" aria-pressed="false">Open Sundays</button>
       <button class="chip" id="favOnly" type="button" aria-pressed="false">☆ Want to go</button>
       <button class="chip" id="hideDone" type="button" aria-pressed="false">Hide ✓ bought</button>
+      <button class="chip" id="showNo" type="button" aria-pressed="false">Show ✕ not for us</button>
+      <button class="chip send" id="sendNo" type="button">Send ✕ list</button>
+    </div>
+    <div id="sendOut" hidden>
+      <span class="count" id="sendMsg"></span>
+      <textarea id="sendText" readonly aria-label="Your Not for us list"></textarea>
     </div>
     <div class="row" id="cats" role="group" aria-label="Filter by type"></div>
     <div class="count" id="count"></div>
@@ -177,6 +190,7 @@ footer p { margin: 0; }
   <div id="list"></div>
 
   <footer>
+    <p><strong>Not for us:</strong> tap ✕ on shops you don't want. They're hidden from the list (tap <em>Show ✕ not for us</em> to see them again). When you're done, tap <em>Send ✕ list</em> and send it to Andrés; the next update removes those shops from the PDF and this site.</p>
     <p><strong>Sundays:</strong> many small shops close on Sundays, some on Mondays too, and a few close 14:00–17:00 for lunch. Chains, El Corte Inglés and both outlets open every day. Madrid has no public holidays in April 2027 (Holy Thursday and Good Friday fall on 25–26 March).</p>
     <p><strong>Score:</strong> the average of Google and TripAdvisor on a 5-point scale. Sources with fewer than 20 reviews are shown but left out. Green is 4.4 and up, amber 3.8–4.3, red below 3.8. TripAdvisor figures come from search listings and may lag the live page.</p>
     <p><strong>Price level</strong> of a main item (a dress, a pair of shoes, a bag), estimated from each brand's usual range: € under €40 · €€ €40–100 · €€€ €100–250 · €€€€ over €250.</p>
@@ -214,13 +228,13 @@ function hoursRows(h) {
   return out;
 }
 
-const state = { cat: "All", q: "", sort: "guide", sunOnly: false, favOnly: false, hideDone: false, favs: new Set(), done: new Set() };
+const state = { cat: "All", q: "", sort: "guide", sunOnly: false, favOnly: false, hideDone: false, showNo: false, favs: new Set(), done: new Set(), no: new Set() };
 try {
   const saved = JSON.parse(localStorage.getItem("mad27-shop-marks") || "{}");
-  state.favs = new Set(saved.favs || []); state.done = new Set(saved.done || []);
+  state.favs = new Set(saved.favs || []); state.done = new Set(saved.done || []); state.no = new Set(saved.no || []);
 } catch (e) {}
 function saveMarks() {
-  try { localStorage.setItem("mad27-shop-marks", JSON.stringify({ favs: [...state.favs], done: [...state.done] })); } catch (e) {}
+  try { localStorage.setItem("mad27-shop-marks", JSON.stringify({ favs: [...state.favs], done: [...state.done], no: [...state.no] })); } catch (e) {}
 }
 
 function ratingBlock(p) {
@@ -237,7 +251,7 @@ function ratingBlock(p) {
 }
 
 function card(p) {
-  const fav = state.favs.has(p.n), done = state.done.has(p.n), sun = sunday(p);
+  const fav = state.favs.has(p.n), done = state.done.has(p.n), no = state.no.has(p.n), sun = sunday(p);
   const tags = [];
   if (p.out) tags.push(`<span class="tag out">${esc(p.out)}</span>`);
   if (sun === "open") tags.push(`<span class="tag">Open Sundays</span>`);
@@ -252,11 +266,12 @@ function card(p) {
   const links = [link(mapUrl(p), "Map")]
     .concat(p.web ? [link(p.web, "Website")] : [])
     .concat(p.reels.map(c => link(reelUrl(c), "Reel by @" + META.reels[c].s))).join("");
-  return `<article class="card${fav ? " fav" : ""}${done ? " done" : ""}${p.event ? " event" : ""}">
+  return `<article class="card${fav ? " fav" : ""}${done ? " done" : ""}${no ? " no" : ""}${p.event ? " event" : ""}">
     <div class="top"><h3>${esc(p.n)}</h3>
       <div class="marks">
         <button class="star" type="button" data-n="${esc(p.n)}" aria-pressed="${fav}" aria-label="Want to go to ${esc(p.n)}">${fav ? "★" : "☆"}</button>
         <button class="tick" type="button" data-n="${esc(p.n)}" aria-pressed="${done}" aria-label="Bought at ${esc(p.n)}">✓</button>
+        <button class="nope" type="button" data-n="${esc(p.n)}" aria-pressed="${no}" aria-label="${esc(p.n)} is not for us">✕</button>
       </div></div>
     ${ratingBlock(p)}
     ${tags.length ? `<div class="tags">${tags.join("")}</div>` : ""}
@@ -283,15 +298,29 @@ catBox.innerHTML = ["All", ...CATS].map(c => `<button class="chip" type="button"
 catBox.addEventListener("click", e => { const b = e.target.closest("button"); if (b) { state.cat = b.textContent; render(); } });
 document.getElementById("q").addEventListener("input", e => { state.q = e.target.value.trim().toLowerCase(); render(); });
 document.getElementById("sort").addEventListener("change", e => { state.sort = e.target.value; render(); });
-for (const id of ["sunOnly", "favOnly", "hideDone"])
+for (const id of ["sunOnly", "favOnly", "hideDone", "showNo"])
   document.getElementById(id).addEventListener("click", () => { state[id] = !state[id]; render(); });
+
+// Send the ✕ list: the phone's share menu where there is one (WhatsApp, email), else copy, else show the text to copy by hand.
+document.getElementById("sendNo").addEventListener("click", async () => {
+  const names = PLACES.map(p => p.n).filter(n => state.no.has(n));
+  const out = document.getElementById("sendOut"), msg = document.getElementById("sendMsg"), box = document.getElementById("sendText");
+  if (!names.length) { out.hidden = false; box.hidden = true; msg.textContent = "Nothing marked ✕ yet."; return; }
+  const text = "Madrid shopping guide: not for us (" + names.length + ")\n" + names.map(n => "✕ " + n).join("\n");
+  box.hidden = false; box.value = text; out.hidden = false;
+  try { if (navigator.share) { await navigator.share({ title: "Not for us", text }); msg.textContent = "Here's the list that was shared:"; return; } } catch (e) {}
+  try { await navigator.clipboard.writeText(text); msg.textContent = "Copied. Paste it in a message to Andrés:"; }
+  catch (e) { box.select(); msg.textContent = "Copy this and send it to Andrés:"; }
+});
 document.getElementById("total").textContent = PLACES.filter(p => !p.event).length + " shops, plus one past pop-up outlet.";
 
 function render() {
   catBox.querySelectorAll(".chip").forEach(b => b.setAttribute("aria-pressed", String(b.textContent === state.cat)));
-  for (const id of ["sunOnly", "favOnly", "hideDone"]) document.getElementById(id).setAttribute("aria-pressed", String(state[id]));
+  for (const id of ["sunOnly", "favOnly", "hideDone", "showNo"]) document.getElementById(id).setAttribute("aria-pressed", String(state[id]));
+  document.getElementById("showNo").textContent = "Show ✕ not for us" + (state.no.size ? " (" + state.no.size + ")" : "");
   const hits = PLACES.filter(p =>
     (state.cat === "All" || p.c === state.cat) &&
+    (state.showNo || !state.no.has(p.n)) &&
     (!state.sunOnly || sunday(p) === "open") &&
     (!state.favOnly || state.favs.has(p.n)) &&
     (!state.hideDone || !state.done.has(p.n)) &&
@@ -309,8 +338,8 @@ function render() {
   list.innerHTML = sections || `<p class="empty">No shops match. Clear the search or pick another type.</p>`;
 }
 document.getElementById("list").addEventListener("click", e => {
-  const b = e.target.closest(".star, .tick"); if (!b) return;
-  const set = b.classList.contains("star") ? state.favs : state.done;
+  const b = e.target.closest(".star, .tick, .nope"); if (!b) return;
+  const set = b.classList.contains("star") ? state.favs : b.classList.contains("tick") ? state.done : state.no;
   const n = b.dataset.n; set.has(n) ? set.delete(n) : set.add(n);
   saveMarks(); render();
 });
