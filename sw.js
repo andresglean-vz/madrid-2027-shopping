@@ -1,5 +1,5 @@
-const CACHE = "mad27-shop-9460550304";
-const CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
+const CACHE = "mad27-shop-5857b728f6";
+const CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "vendor/leaflet.js", "vendor/leaflet.css"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith("mad27-shop-") && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));

@@ -14,6 +14,8 @@ img { max-width: 100%; } [hidden] { display: none !important; }
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="vendor/leaflet.css">
+<script src="vendor/leaflet.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -152,6 +154,17 @@ button.chip.send { border-color: var(--low); color: var(--low); }
   .controls button.chip { padding: 6px 10px; }
 }
 .note { font-size: 12.5px; color: var(--muted); font-style: italic; margin: 0; }
+#mapWrap { display: grid; gap: 8px; }
+body.mapview .controls { position: static; }  /* a pinned filter bar would cover the map on a phone */
+#map { height: 68vh; min-height: 320px; border-radius: 10px; border: 1px solid var(--line); z-index: 0; }
+.maplegend { font-size: 12.5px; color: var(--muted); gap: 6px 14px; }
+.maplegend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.chip.view[aria-pressed="true"] { background: var(--carmine); border-color: var(--carmine); }
+.leaflet-popup-content { font: 13px/1.4 var(--body); margin: 10px 12px; }
+.leaflet-popup-content b { font-size: 14.5px; }
+.pop-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.pop-links a, .pop-links button { font: 600 12px var(--body); padding: 5px 10px; border-radius: 999px; border: 1px solid #1f4ea8; color: #1f4ea8; background: #fff; text-decoration: none; cursor: pointer; }
+.pop-links a:first-child { background: #1f4ea8; color: #fff; }
 .empty { color: var(--muted); }
 footer { font-size: 13px; color: var(--muted); max-width: 72ch; display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 16px; }
 footer p { margin: 0; }
@@ -167,6 +180,7 @@ footer p { margin: 0; }
   <div class="controls">
     <div class="row">
       <input type="search" id="q" placeholder="Search a shop, brand or street" aria-label="Search shops">
+      <button class="chip view" id="viewMap" type="button" aria-pressed="false">Map</button>
       <select id="sort" aria-label="Group or sort shops">
         <option value="guide">Group by type</option>
         <option value="area">Group by area</option>
@@ -190,9 +204,22 @@ footer p { margin: 0; }
     <div class="count" id="count"></div>
   </div>
 
+  <div id="mapWrap" hidden>
+    <div id="map" role="region" aria-label="Map of shops"></div>
+    <div class="row maplegend">
+      <span><i class="dot" style="background: var(--carmine)"></i>Not marked</span>
+      <span><i class="dot" style="background: var(--good)"></i>☆ Want to go</span>
+      <span><i class="dot" style="background: var(--cobalt)"></i>✓ Bought</span>
+      <span><i class="dot" style="background: var(--muted)"></i>✕ Not for us</span>
+      <button class="chip" id="locateMe" type="button">Show where I am</button>
+    </div>
+    <p class="count" id="mapNote"></p>
+  </div>
+
   <div id="list"></div>
 
   <footer>
+    <p><strong>Map:</strong> tap <em>Map</em> to see the shops as pins; they follow the same filters as the list, and their colour shows your marks. Tap a pin for directions or the shop's details, and <em>Show where I am</em> to see yourself on the map. The map needs data; the list works offline.</p>
     <p><strong>Nearby:</strong> <em>Group by area</em> lists shops by neighbourhood, with shops on the same street together; the area menu shows just one neighbourhood. <em>Nearest to me</em> asks for your phone's location and lists the closest shops first. Your location stays on the phone.</p>
     <p><strong>Not for us:</strong> tap ✕ on shops you don't want. They're hidden from the list (tap <em>Show ✕ not for us</em> to see them again). When you're done, tap <em>Send ✕ list</em> and send it to Andrés; the next update removes those shops from the PDF and this site.</p>
     <p><strong>Sundays:</strong> many small shops close on Sundays, some on Mondays too, and a few close 14:00–17:00 for lunch. Chains, El Corte Inglés and both outlets open every day. Madrid has no public holidays in April 2027 (Holy Thursday and Good Friday fall on 25–26 March).</p>
@@ -243,7 +270,7 @@ function hoursRows(h) {
   return out;
 }
 
-const state = { cat: "All", q: "", sort: "guide", area: "", pos: null, locMsg: "", sunOnly: false, favOnly: false, hideDone: false, showNo: false, favs: new Set(), done: new Set(), no: new Set() };
+const state = { cat: "All", q: "", sort: "guide", area: "", view: "list", pos: null, locMsg: "", sunOnly: false, favOnly: false, hideDone: false, showNo: false, favs: new Set(), done: new Set(), no: new Set() };
 try {
   const saved = JSON.parse(localStorage.getItem("mad27-shop-marks") || "{}");
   state.favs = new Set(saved.favs || []); state.done = new Set(saved.done || []); state.no = new Set(saved.no || []);
@@ -283,7 +310,7 @@ function card(p) {
   const links = [link(mapUrl(p), "Map")]
     .concat(p.web ? [link(p.web, "Website")] : [])
     .concat(p.reels.map(c => link(reelUrl(c), "Reel by @" + META.reels[c].s))).join("");
-  return `<article class="card${fav ? " fav" : ""}${done ? " done" : ""}${no ? " no" : ""}${p.event ? " event" : ""}">
+  return `<article id="${cardId(p)}" class="card${fav ? " fav" : ""}${done ? " done" : ""}${no ? " no" : ""}${p.event ? " event" : ""}">
     <div class="top"><h3>${esc(p.n)}</h3>
       <div class="marks">
         <button class="star" type="button" data-n="${esc(p.n)}" aria-pressed="${fav}" aria-label="Want to go to ${esc(p.n)}">${fav ? "★" : "☆"}</button>
@@ -329,15 +356,86 @@ areaSel.innerHTML += ZONES.filter(z => PLACES.some(p => p.z === z))
   .map(z => `<option value="${esc(z)}">${esc(z)} (${PLACES.filter(p => p.z === z).length})</option>`).join("");
 areaSel.addEventListener("change", e => { state.area = e.target.value; render(); });
 
-// "Nearest to me": the phone's location, used only here to sort; it is never stored or sent anywhere.
-function locate() {
-  state.locMsg = "Finding your location…"; render();
+// "Nearest to me" and the map's "Show where I am": the phone's location, used only here; never stored or sent anywhere.
+function locate(onMap) {
+  state.locMsg = "Finding your location… (allow location if your phone asks)"; render();
   if (!navigator.geolocation) { state.locMsg = "This browser can't share your location, so shops are sorted by distance from Sol."; render(); return; }
   navigator.geolocation.getCurrentPosition(
-    pos => { state.pos = [pos.coords.latitude, pos.coords.longitude]; state.locMsg = ""; render(); },
-    () => { state.locMsg = "Location not available (allow it in the browser to use this), so shops are sorted by distance from Sol."; render(); },
+    pos => { state.pos = [pos.coords.latitude, pos.coords.longitude]; state.locMsg = ""; render(); if (onMap) showMe(true); },
+    () => { state.locMsg = "Location not available (allow it for this site in your phone's settings), so shops are sorted by distance from Sol."; render(); },
     { enableHighAccuracy: true, timeout: 15000, maximumAge: 120000 });
 }
+
+// ---- Map view (Leaflet + OpenStreetMap tiles), same as the food guide. Pins follow the same filters as the list. ----
+function cardId(p) { return "c-" + p.n.normalize("NFD").replace(/[^\w]+/g, "-").toLowerCase(); }
+const cssVar = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const SOL = [40.41689, -3.70348];
+let map = null, pinLayer = null, meDot = null, fitted = false;
+
+function pinColor(p) {
+  if (state.no.has(p.n)) return cssVar("--muted");
+  if (state.done.has(p.n)) return cssVar("--cobalt");
+  if (state.favs.has(p.n)) return cssVar("--good");
+  return cssVar("--carmine");
+}
+
+function popupHtml(p) {
+  const s = scoreOf(p);
+  const away = state.pos && p.ll ? km(state.pos, p.ll) : null;
+  const bits = [s ? s.v.toFixed(1) + "/5" : "", p.lvl ? "€".repeat(p.lvl) : "", p.z || "",
+    away !== null ? (away < 1 ? Math.round(away * 1000) + " m away" : away.toFixed(1) + " km away") : ""].filter(Boolean);
+  const sun = sunday(p) === "open" ? "Open Sundays" : sunday(p) === "closed" ? "Closed Sundays" : "";
+  return `<b>${esc(p.n)}</b><br><span>${esc(p.c)}${sun ? " · " + sun : ""}</span>${bits.length ? "<br>" + esc(bits.join(" · ")) : ""}
+    <div class="pop-links"><a href="${esc(mapUrl(p))}" target="_blank" rel="noopener">Directions</a><button type="button" data-goto="${cardId(p)}">Details</button></div>`;
+}
+
+function drawMap(hits) {
+  const note = document.getElementById("mapNote");
+  if (!window.L) { note.textContent = "The map needs an internet connection the first time it opens."; return; }
+  if (!map) {
+    map = L.map("map", { zoomControl: true }).setView(SOL, 14);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      { maxZoom: 19, attribution: "&copy; OpenStreetMap contributors" }).addTo(map);
+    pinLayer = L.layerGroup().addTo(map);
+    map.on("popupopen", e => {
+      const b = e.popup.getElement().querySelector("[data-goto]");
+      if (b) b.addEventListener("click", () => {
+        state.view = "list"; render();
+        const c = document.getElementById(b.dataset.goto); if (c) c.scrollIntoView({ block: "start" });
+      });
+    });
+  }
+  setTimeout(() => map.invalidateSize(), 0);
+  pinLayer.clearLayers();
+  const shown = hits.filter(p => p.ll && !p.event);  // the past ski-wear pop-up isn't a place to visit
+  shown.forEach(p => L.circleMarker(p.ll, { radius: 9, weight: 2, color: "#fff", fillColor: pinColor(p), fillOpacity: 0.95 })
+    .bindPopup(popupHtml(p), { maxWidth: 260 }).addTo(pinLayer));
+  note.textContent = `${shown.length} shops on the map` + (state.locMsg ? " · " + state.locMsg : "") +
+    (/github\.io$|^localhost$/.test(location.hostname) ? "" : " · map tiles only load on the website");
+  // Open on central Madrid; the two outlets outside the city would zoom the map right out.
+  if (!fitted && shown.length) {
+    const city = shown.filter(p => p.km < 6);
+    if (city.length) map.fitBounds(L.latLngBounds(city.map(p => p.ll)), { padding: [24, 24] });
+    fitted = true;
+  }
+  if (state.pos) showMe(false);
+}
+
+function showMe(center) {
+  if (!map || !state.pos) return;
+  if (!meDot) meDot = L.circleMarker(state.pos, { radius: 8, weight: 3, color: "#fff", fillColor: "#2b7fff", fillOpacity: 1 }).bindTooltip("You are here").addTo(map);
+  meDot.setLatLng(state.pos);
+  if (center) map.setView(state.pos, 16);
+}
+
+document.getElementById("viewMap").addEventListener("click", () => {
+  state.view = state.view === "map" ? "list" : "map";
+  render();
+});
+document.getElementById("locateMe").addEventListener("click", () => {
+  if (state.pos) { showMe(true); return; }
+  locate(true);
+});
 for (const id of ["sunOnly", "favOnly", "hideDone", "showNo"])
   document.getElementById(id).addEventListener("click", () => { state[id] = !state[id]; render(); });
 
@@ -368,6 +466,12 @@ function render() {
     (!state.q || [p.n, p.w, p.a, p.c, p.note, p.hnote, ...p.reels.map(c => META.reels[c].s)].join(" ").toLowerCase().includes(state.q)));
   document.getElementById("count").textContent = hits.length + (hits.length === 1 ? " shop" : " shops") + " shown" + (state.locMsg ? " · " + state.locMsg : "");
   const list = document.getElementById("list");
+  document.getElementById("mapWrap").hidden = state.view !== "map";
+  document.body.classList.toggle("mapview", state.view === "map");
+  document.getElementById("viewMap").setAttribute("aria-pressed", String(state.view === "map"));
+  document.getElementById("viewMap").textContent = state.view === "map" ? "List" : "Map";
+  if (state.view === "map") { list.hidden = true; drawMap(hits); return; }
+  list.hidden = false;
   list.style.display = "grid"; list.style.gap = "32px";
   if (state.sort === "me") {
     const title = state.pos ? "Nearest to you" : "Nearest to Sol";
